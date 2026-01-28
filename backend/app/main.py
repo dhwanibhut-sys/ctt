@@ -1,34 +1,26 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import ast
-import tempfile
 import subprocess
+import tempfile
 import json
 import os
 
-app = FastAPI(
-    title="CTT Backend",
-    description="Static Python code analysis and call graph generation",
-    version="1.0.0",
-)
+app = FastAPI()
 
-# ✅ CORS — PUBLIC API (works on mobile + desktop)
+# Simple, permissive CORS (what you had earlier)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # allow all origins
-    allow_credentials=False,      # MUST be False with "*"
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ---------- Models ----------
-
 class CodeRequest(BaseModel):
     code: str
 
-
-# ---------- Utilities ----------
 
 def extract_functions(code: str):
     tree = ast.parse(code)
@@ -53,7 +45,7 @@ def generate_call_graph(code: str):
         with open(code_path, "w", encoding="utf-8") as f:
             f.write(code)
 
-        # Run code2flow
+        # THIS IS THE VERSION YOU HAD WORKING
         subprocess.run(
             [
                 "code2flow",
@@ -93,29 +85,17 @@ def generate_call_graph(code: str):
     }
 
 
-# ---------- Routes ----------
-
 @app.get("/")
 def root():
-    return {
-        "status": "ok",
-        "message": "CTT backend is running"
-    }
+    return {"status": "ok", "message": "CTT backend is running"}
 
 
 @app.post("/flow")
 def analyze_code(req: CodeRequest):
-    try:
-        functions = extract_functions(req.code)
-        graph = generate_call_graph(req.code)
+    functions = extract_functions(req.code)
+    graph = generate_call_graph(req.code)
 
-        return {
-            "functions": functions,
-            "graph": graph,
-        }
-
-    except SyntaxError as e:
-        raise HTTPException(status_code=400, detail=f"Syntax error: {e}")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "functions": functions,
+        "graph": graph,
+    }
