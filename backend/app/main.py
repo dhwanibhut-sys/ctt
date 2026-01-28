@@ -7,6 +7,13 @@ from app.dot_parser import parse_dot
 from app.ast_parser import extract_functions
 
 app = FastAPI()
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "message": "CTT backend is running"
+    }
+
 
 # ✅ Allow frontend to talk to backend
 app.add_middleware(
