@@ -18,7 +18,7 @@ def root():
 # ✅ Allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -28,11 +28,18 @@ class CodeInput(BaseModel):
 
 @app.post("/flow")
 def analyze_code(data: CodeInput):
-    dot_graph = run_code2flow(data.code)
-    graph = parse_dot(dot_graph)
-    functions = extract_functions(data.code)
+    try:
+        dot_graph = run_code2flow(data.code)
+        graph = parse_dot(dot_graph)
+        functions = extract_functions(data.code)
 
-    return {
-        "functions": functions,
-        "graph": graph
-    }
+        return {
+            "functions": functions,
+            "graph": graph
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "functions": [],
+            "graph": {"nodes": [], "edges": []}
+        }

@@ -18,7 +18,7 @@ export default function Home() {
     setError(null);
 
     try {
-      const res = await fetch("https://ctt-z2mq.onrender.com/flow", {
+      const res = await fetch("http://127.0.0.1:8000/flow", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ code }),

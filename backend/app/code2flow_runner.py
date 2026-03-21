@@ -21,7 +21,11 @@ def run_code2flow(code: str) -> str:
         "--output", dot_file
     ]
 
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        # Return empty dot graph if code2flow fails
+        return "digraph G { }"
 
     with open(dot_file, "r", encoding="utf-8") as f:
         return f.read()
